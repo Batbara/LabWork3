@@ -1,41 +1,26 @@
 package controller;
 
 import model.FunctionData;
+import model.TableRow;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class DataController {
-    private FunctionData data;
-    private int maxArrayLength;
-    private int arrayQuantity;
-    private List< List<Integer> > arraysToProccess;
+    private FunctionData functionData;
     public DataController(){
-        data = new FunctionData();
-        arraysToProccess = new ArrayList<>();
-        maxArrayLength = 0;
-        arrayQuantity = 0;
-        createArrays();
+        functionData = new FunctionData();
     }
     public void createArrays(){
-        Random randomGenerator = new Random();
-        for (int array=0; array<arrayQuantity; array++){
-            int length = randomGenerator.nextInt(maxArrayLength);
-            List<Integer> randomArray = new ArrayList<>();
-            for (int size=0; size<length; size++){
-                randomArray.add(randomGenerator.nextInt());
-            }
-            arraysToProccess.add(randomArray);
-        }
+        functionData.createArrays();
     }
     public void setByKey(String key, String data){
         switch (key){
             case "Max количество элементов:":
             {
                 try {
-                    maxArrayLength = Integer.parseInt(data);
+                    functionData.setMaxArrayLength(Integer.parseInt(data));
                 }catch (NumberFormatException e){
                     System.err.println("NumberFormatException caught!");
                     break;
@@ -45,7 +30,7 @@ public class DataController {
             case "Количество массивов: ":
             {
                 try {
-                    arrayQuantity = Integer.parseInt(data);
+                   functionData.setNumberOfArrays(Integer.parseInt(data));
                 }catch (NumberFormatException e){
                     System.err.println("NumberFormatException caught!");
                     break;
@@ -54,4 +39,18 @@ public class DataController {
             }
         }
     }
+    public void sorting() throws ExecutionException, InterruptedException {
+        functionData.runSortingAlgorithm();
+    }
+    public List<TableRow> getListOfRows(){
+        List<TableRow> listOfRows = new ArrayList<>();
+        Map<Integer, Long> dataMapping = functionData.getDataMapping();
+        Set<Integer> keys = dataMapping.keySet();
+        for (Integer key : keys){
+            TableRow row = new TableRow(key, dataMapping.get(key));
+            listOfRows.add(row);
+        }
+        return listOfRows;
+    }
+
 }

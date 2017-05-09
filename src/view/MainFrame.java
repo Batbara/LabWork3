@@ -1,16 +1,18 @@
 package view;
 
 import controller.DataController;
+import model.TableRow;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MainFrame {
     private DataController dataController;
@@ -81,6 +83,38 @@ public class MainFrame {
                 dataController.setByKey(key, dataFields.get(key).getText());
             }
             dataController.createArrays();
+            try {
+                dataController.sorting();
+            } catch (ExecutionException e1) {
+                e1.printStackTrace();
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+            fillTable(dataController.getListOfRows());
         });
+    }
+    private void fillTable(List<TableRow> listOfRows){
+
+        DefaultTableModel tableModel = (DefaultTableModel)dataTable.getModel();
+        for (TableRow row : listOfRows){
+            tableModel.addRow(row.getRow());
+        }
+
+        TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(tableModel);
+        Comparator<String> elementsNumberComparator = new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                if(Integer.parseInt(o1)>Integer.parseInt(o2))
+                    return 1;
+                if(Integer.parseInt(o1)<Integer.parseInt(o2))
+                    return -1;
+                return 0;
+            }
+        };
+        rowSorter.setComparator(0, elementsNumberComparator);
+        rowSorter.setComparator(1, elementsNumberComparator);
+
+        dataTable.setRowSorter(rowSorter);
+        dataTable.getRowSorter().toggleSortOrder(0);
     }
 }
