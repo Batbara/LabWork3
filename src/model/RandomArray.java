@@ -6,19 +6,16 @@ import java.util.Random;
 
 
 public class RandomArray {
-    private int maxArrayLength;
+    private int arrayLength;
     private List<Integer> randomArray;
-    private long timeToSort;
-    public RandomArray(int n){
-        maxArrayLength = n;
-        randomArray = new ArrayList<>(maxArrayLength);
-        timeToSort = 0;
+    public RandomArray(int arrayLength){
+        this.arrayLength = arrayLength;
+        randomArray = new ArrayList<>(this.arrayLength);
         createArray();
     }
     private void createArray(){
         Random randomGenerator = new Random();
-        int length = randomGenerator.nextInt(maxArrayLength);
-        for (int size=0; size<length; size++){
+       for (int size=0; size<arrayLength; size++){
             randomArray.add(randomGenerator.nextInt());
         }
     }
@@ -28,13 +25,5 @@ public class RandomArray {
 
     public Object[] getRandomArray() {
         return randomArray.toArray();
-    }
-
-    public void setTimeToSort(long timeToSort) {
-        this.timeToSort = timeToSort;
-    }
-
-    public long getTimeToSort() {
-        return timeToSort;
     }
 }

@@ -1,16 +1,21 @@
 package controller;
 
-import model.FunctionData;
-import model.TableRow;
 
-import java.lang.reflect.Array;
+
+import model.*;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class DataController {
     private FunctionData functionData;
+    private JTable dataTable;
     public DataController(){
         functionData = new FunctionData();
+        dataTable = new JTable();
     }
     public void createArrays(){
         functionData.createArrays();
@@ -27,10 +32,10 @@ public class DataController {
                 }
                 break;
             }
-            case "Количество массивов: ":
+            case "Шаг:":
             {
                 try {
-                   functionData.setNumberOfArrays(Integer.parseInt(data));
+                   functionData.setIncreasingStep(Integer.parseInt(data));
                 }catch (NumberFormatException e){
                     System.err.println("NumberFormatException caught!");
                     break;
@@ -40,17 +45,37 @@ public class DataController {
         }
     }
     public void sorting() throws ExecutionException, InterruptedException {
-        functionData.runSortingAlgorithm();
-    }
-    public List<TableRow> getListOfRows(){
-        List<TableRow> listOfRows = new ArrayList<>();
-        Map<Integer, Long> dataMapping = functionData.getDataMapping();
-        Set<Integer> keys = dataMapping.keySet();
-        for (Integer key : keys){
-            TableRow row = new TableRow(key, dataMapping.get(key));
-            listOfRows.add(row);
+
+        List<ArrayPack> arraysToProccess = functionData.getArraysToProccess();
+        for (ArrayPack arrayPack : arraysToProccess) {
+
+            SortingAlgorithm startAlgo = new SortingAlgorithm(arrayPack, dataTable, functionData);
+            startAlgo.getThread().join(100, 10);
+
         }
-        return listOfRows;
+
+    }
+//   public void updateDataMapping(){
+//            DefaultTableModel tableModel = (DefaultTableModel) dataTable.getModel();
+//            Vector<Vector<String>> allData = tableModel.getDataVector();
+//            for(Vector<String> rowData : allData){
+//                Integer arrayLength = Integer.parseInt(rowData.get(0));
+//                Long timeValue = Long.parseLong(rowData.get(1));
+//                functionData.getDataMapping().put(arrayLength, timeValue);
+//            }
+//    }
+
+    public Map<Integer,Long> getData(){
+        return functionData.getDataMapping();
+    }
+    public int getStep(){
+        return functionData.getIncreasingStep();
+    }
+    public int getMaxArrayLength(){
+        return functionData.getMaxArrayLength();
     }
 
+    public void setDataTable(JTable dataTable) {
+        this.dataTable = dataTable;
+    }
 }
