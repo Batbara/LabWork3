@@ -1,6 +1,7 @@
 package view;
 
 import controller.DataController;
+import model.PointsList;
 import model.TableRow;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 public class MainFrame {
     private DataController dataController;
@@ -73,10 +75,6 @@ public class MainFrame {
             return 0;
         };
         rowSorter.setComparator(0, elementsNumberComparator);
-        rowSorter.setComparator(1, elementsNumberComparator);
-
-        dataTable.setRowSorter(rowSorter);
-        dataTable.getRowSorter().toggleSortOrder(0);
     }
     private JPanel createFieldsPanel(){
         JPanel holdingPanel = new JPanel(new GridLayout(3,2));
@@ -112,11 +110,31 @@ public class MainFrame {
             }
             dataController.createArrays();
             try {
-                dataController.sorting();
-                Map dataMapping = dataController.getData();
-                graph.setFunctionData(dataMapping);
-                graph.repaint();
-                System.out.println(dataMapping.size());
+                if(dataController.sorting()) {
+                    dataTable.repaint();
+                    dataTable.revalidate();
+                    PointsList dataMapping = dataController.getData();
+                    System.out.println("mapping size: "+dataMapping.getPointsList().size());
+                    System.out.println("num of rows: "+dataTable.getModel().getRowCount());
+                    graph.setPointsList(dataMapping);
+
+                    graph.repaint();
+                    Executors.newSingleThreadExecutor().execute(() -> {
+                        synchronized (graph) {
+                            graph.setPointsList(dataMapping);
+
+                            graph.repaint();
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                            }
+                            graph.drawGraph((Graphics2D) graph.getGraphics());
+                        }
+                    });
+
+                }
+
             } catch (ExecutionException | InterruptedException e1) {
                 e1.printStackTrace();
             }
@@ -126,15 +144,5 @@ public class MainFrame {
     private void clearTable(){
         DefaultTableModel tableModel = (DefaultTableModel)dataTable.getModel();
         tableModel.setRowCount(0);
-    }
-    private void fillTable(List<TableRow> listOfRows){
-
-        DefaultTableModel tableModel = (DefaultTableModel)dataTable.getModel();
-        
-        for (TableRow row : listOfRows){
-            tableModel.addRow(row.getRow());
-        }
-
-
     }
 }

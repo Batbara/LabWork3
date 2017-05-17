@@ -1,21 +1,18 @@
 package controller;
 
-
-
 import model.*;
-
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 
 public class DataController {
     private FunctionData functionData;
     private JTable dataTable;
+
     public DataController(){
         functionData = new FunctionData();
         dataTable = new JTable();
+
     }
     public void createArrays(){
         functionData.createArrays();
@@ -44,38 +41,31 @@ public class DataController {
             }
         }
     }
-    public void sorting() throws ExecutionException, InterruptedException {
+    public boolean sorting() throws ExecutionException, InterruptedException {
+        setPointsList(new PointsList());
+        List<ArrayPack> arraysToProccess = functionData.getArraysToProcess();
 
-        List<ArrayPack> arraysToProccess = functionData.getArraysToProccess();
+        System.out.println("num of threads: "+arraysToProccess.size());
+        ExecutorService threadPool = Executors.newFixedThreadPool(arraysToProccess.size());
         for (ArrayPack arrayPack : arraysToProccess) {
 
-            SortingAlgorithm startAlgo = new SortingAlgorithm(arrayPack, dataTable, functionData);
-            startAlgo.getThread().join(100, 10);
-
+            threadPool.submit(new SortingAlgorithm(arrayPack, dataTable, functionData));
         }
+        threadPool.shutdown();
+        boolean finished = threadPool.awaitTermination(500, TimeUnit.DAYS);
+        return finished;
+    }
 
-    }
-//   public void updateDataMapping(){
-//            DefaultTableModel tableModel = (DefaultTableModel) dataTable.getModel();
-//            Vector<Vector<String>> allData = tableModel.getDataVector();
-//            for(Vector<String> rowData : allData){
-//                Integer arrayLength = Integer.parseInt(rowData.get(0));
-//                Long timeValue = Long.parseLong(rowData.get(1));
-//                functionData.getDataMapping().put(arrayLength, timeValue);
-//            }
-//    }
 
-    public Map<Integer,Long> getData(){
-        return functionData.getDataMapping();
+    public PointsList getData(){
+        return functionData.getPointsList();
     }
-    public int getStep(){
-        return functionData.getIncreasingStep();
-    }
-    public int getMaxArrayLength(){
-        return functionData.getMaxArrayLength();
+    public void setPointsList(PointsList pointsList){
+        functionData.getPointsList().setPointsList(pointsList);
     }
 
     public void setDataTable(JTable dataTable) {
         this.dataTable = dataTable;
     }
+
 }

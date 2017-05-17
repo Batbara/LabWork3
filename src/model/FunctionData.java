@@ -1,27 +1,26 @@
 package model;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 public class FunctionData {
     private int increasingStep;
     private int maxArrayLength;
-    private static int MIN_ARRAY_LENGTH = 2;
-    private static int NUMBER_OF_ARRAYS = 250;
-    private Map<Integer, Long> dataMapping;
-    private List< ArrayPack > arraysToProccess;
+    private PointsList pointsList;
+    private List< ArrayPack > arraysToProcess;
 
     public FunctionData(){
         maxArrayLength = 0;
         increasingStep = 0;
-        dataMapping = new HashMap<>();
-        arraysToProccess =  new ArrayList<>();
+        pointsList = new PointsList();
+
+        arraysToProcess =  new ArrayList<>();
     }
     public void createArrays(){
-        arraysToProccess = new ArrayList<>();
-        for (int array = 2; array< maxArrayLength; array+=increasingStep){
+        arraysToProcess = new ArrayList<>();
+        int MIN_ARRAY_LENGTH = 2;
+        for (int array = MIN_ARRAY_LENGTH; array< maxArrayLength; array+=increasingStep){
             ArrayPack arrayPack = new ArrayPack(array);
-            arraysToProccess.add(arrayPack);
+            arraysToProcess.add(arrayPack);
         }
     }
 
@@ -32,24 +31,12 @@ public class FunctionData {
     public void setMaxArrayLength(int maxArrayLength) {
         this.maxArrayLength = maxArrayLength;
     }
-    public void runSortingAlgorithm() throws ExecutionException, InterruptedException {
 
-
+    public PointsList getPointsList() {
+        return pointsList;
     }
 
-    public Map<Integer, Long> getDataMapping (){
-        return dataMapping;
-    }
-
-    public List<ArrayPack> getArraysToProccess() {
-        return arraysToProccess;
-    }
-
-    public int getIncreasingStep() {
-        return increasingStep;
-    }
-
-    public int getMaxArrayLength() {
-        return maxArrayLength;
+    public List<ArrayPack> getArraysToProcess() {
+        return arraysToProcess;
     }
 }

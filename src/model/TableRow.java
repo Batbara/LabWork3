@@ -1,12 +1,7 @@
 package model;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Vector;
 
-/**
- * Created by Batbara on 09.05.2017.
- */
 public class TableRow {
     private Vector<String> row;
     private Integer numberOfElements;
