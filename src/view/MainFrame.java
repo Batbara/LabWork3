@@ -2,7 +2,6 @@ package view;
 
 import controller.DataController;
 import model.PointsList;
-import model.TableRow;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -10,13 +9,12 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 public class MainFrame {
     private DataController dataController;
-    private GraphComponent graph;
+    private GraphComponent graphComponent;
     private JTable dataTable;
     private JFrame mainFrame;
     private Map<String,JTextField> dataFields;
@@ -40,15 +38,18 @@ public class MainFrame {
         mainFrame.add(tableAndDataPanel, BorderLayout.WEST);
         addButtonListener();
 
-        graph = new GraphComponent();
 
-        JScrollPane graphHolder = new JScrollPane(graph);
+        graphComponent = new GraphComponent();
+        graphComponent.scrollRectToVisible(new Rectangle(0,0,100,100));
+        JScrollPane graphHolder = new JScrollPane(graphComponent);
         graphHolder.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         graphHolder.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         graphHolder.setBackground(Color.white);
-        graphHolder.setPreferredSize(new Dimension(450,250));
+        graphHolder.setPreferredSize(new Dimension(150,150));
+        //graphHolder.getViewport().setSize(new Dimension(50,50));
         graphHolder.setVisible(true);
         mainFrame.add(graphHolder);
+
          }
     private void initFrame(){
         mainFrame = new JFrame("Лабораторная работа №3");
@@ -116,22 +117,7 @@ public class MainFrame {
                     PointsList dataMapping = dataController.getData();
                     System.out.println("mapping size: "+dataMapping.getPointsList().size());
                     System.out.println("num of rows: "+dataTable.getModel().getRowCount());
-                    graph.setPointsList(dataMapping);
-
-                    graph.repaint();
-                    Executors.newSingleThreadExecutor().execute(() -> {
-                        synchronized (graph) {
-                            graph.setPointsList(dataMapping);
-
-                            graph.repaint();
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e1) {
-                                e1.printStackTrace();
-                            }
-                            graph.drawGraph((Graphics2D) graph.getGraphics());
-                        }
-                    });
+                    Executors.newSingleThreadExecutor().execute(() -> graphComponent.repaint());
 
                 }
 

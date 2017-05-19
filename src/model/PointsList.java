@@ -37,7 +37,7 @@ public class PointsList {
         return false;
     }
 
-    public void makeCoordinates(){
+    public List<PointCoordinates> getListOfCoordinates(){
          listOfCoordinates = new ArrayList<>();
 
         for(Integer xValue : getXSet()){
@@ -48,10 +48,6 @@ public class PointsList {
             listOfCoordinates.add(pointCoordinates);
         }
         Collections.sort(listOfCoordinates, (o1, o2) -> o1.getX() < o2.getX() ? -1 : o1.getX().equals(o2.getX()) ? 0 : 1);
-
-    }
-
-    public List<PointCoordinates> getListOfCoordinates() {
         return listOfCoordinates;
     }
 }
