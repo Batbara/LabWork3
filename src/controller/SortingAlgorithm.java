@@ -54,12 +54,9 @@ public class SortingAlgorithm implements Runnable {
     }
 
     private synchronized void updateTable() {
-        //System.out.println("trying to update table in "+thread.getName());
         TableRow row = new TableRow(eachArrayLength, averageTime);
         DefaultTableModel tableModel = (DefaultTableModel) dataTable.getModel();
         tableModel.addRow(row.getRow());
-        // System.out.println("current num of rows: "+tableModel.getDataVector().size());
-        // System.out.println("there should be n="+eachArrayLength+" t="+averageTime);
         dataTable.repaint();
         dataTable.revalidate();
     }

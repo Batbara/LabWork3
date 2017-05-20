@@ -4,25 +4,27 @@ import controller.DataController;
 import model.PointsList;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.util.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseWheelEvent;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 public class MainFrame {
+
     private DataController dataController;
     private GraphComponent graphComponent;
     private JTable dataTable;
     private JFrame mainFrame;
-    private Map<String,JTextField> dataFields;
+    private Map<String, JTextField> dataFields;
+    private JSpinner scalingSpinner;
     private JButton buttonToSendData;
 
-    public MainFrame(DataController dataController){
+    public MainFrame(DataController dataController) {
         this.dataController = dataController;
         dataFields = new LinkedHashMap<>();
         buttonToSendData = new JButton("Построить график");
@@ -37,16 +39,16 @@ public class MainFrame {
         mainFrame.add(tableAndDataPanel, BorderLayout.WEST);
         addButtonListener();
 
-
         graphComponent = new GraphComponent();
-        graphComponent.setPreferredSize(new Dimension(650,400));
-        graphComponent.scrollRectToVisible(new Rectangle(0,0,100,100));
-        //JScrollPane graphHolder = createGraphHolder();
-        JPanel graphAndScalingPanel = createGraphAndScalingPanel();
+        graphComponent.setPreferredSize(new Dimension(650, 400));
+        graphComponent.scrollRectToVisible(new Rectangle(0, 0, 100, 100));
 
+        scalingSpinner = new JSpinner();
+        JPanel graphAndScalingPanel = createGraphAndScalingPanel();
         mainFrame.add(graphAndScalingPanel);
-        }
-    private void initFrame(){
+    }
+
+    private void initFrame() {
         mainFrame = new JFrame("Лабораторная работа №3");
         mainFrame.setLayout(new BorderLayout());
         mainFrame.setPreferredSize(new Dimension(950, 800));
@@ -57,36 +59,29 @@ public class MainFrame {
         mainFrame.setResizable(false);
         mainFrame.setVisible(true);
     }
-    private void initTable(){
-        String []columnNames= {"n", "t"};
-        dataTable = new JTable(new DefaultTableModel(columnNames,0));
-        dataTable.setSize(new Dimension(50,500));
 
-        TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(dataTable.getModel());
-        Comparator<String> elementsNumberComparator = (o1, o2) -> {
-            if(Integer.parseInt(o1)>Integer.parseInt(o2))
-                return 1;
-            if(Integer.parseInt(o1)<Integer.parseInt(o2))
-                return -1;
-            return 0;
-        };
-        rowSorter.setComparator(0, elementsNumberComparator);
+    private void initTable() {
+        String[] columnNames = {"n", "t"};
+        dataTable = new JTable(new DefaultTableModel(columnNames, 0));
+        dataTable.setSize(new Dimension(50, 500));
     }
-    private JPanel createFieldsPanel(){
-        JPanel holdingPanel = new JPanel(new GridLayout(2,2));
+
+    private JPanel createFieldsPanel() {
+        JPanel holdingPanel = new JPanel(new GridLayout(2, 2));
         Set<String> labels = dataFields.keySet();
-        for (String label : labels ){
+        for (String label : labels) {
             holdingPanel.add(new JLabel(label));
             holdingPanel.add(dataFields.get(label));
         }
         return holdingPanel;
     }
-    private JPanel createTableAndDataPanel(){
+
+    private JPanel createTableAndDataPanel() {
         JPanel tableAndDataPanel = new JPanel();
         JPanel fieldsPanel = createFieldsPanel();
 
-        tableAndDataPanel.setLayout(new BoxLayout(tableAndDataPanel,BoxLayout.Y_AXIS));
-        tableAndDataPanel.setPreferredSize(new Dimension(350,350));
+        tableAndDataPanel.setLayout(new BoxLayout(tableAndDataPanel, BoxLayout.Y_AXIS));
+        tableAndDataPanel.setPreferredSize(new Dimension(350, 350));
 
         JPanel buttonHoldingTable = new JPanel(new FlowLayout());
         buttonHoldingTable.add(buttonToSendData);
@@ -97,15 +92,41 @@ public class MainFrame {
 
         return tableAndDataPanel;
     }
-    private JScrollPane createGraphHolder(){
+
+    private JScrollPane createGraphHolder() {
 
         JScrollPane graphHolder = new JScrollPane(graphComponent);
         graphHolder.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         graphHolder.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         graphHolder.setBackground(Color.white);
-        graphHolder.setPreferredSize(new Dimension(700,450));
+
+        graphHolder.setPreferredSize(new Dimension(700, 450));
         graphHolder.setMaximumSize(graphHolder.getPreferredSize());
         graphHolder.setSize(graphHolder.getPreferredSize());
+
+        graphHolder.addMouseWheelListener(new MouseAdapter() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                super.mouseWheelMoved(e);
+                int currentScale = graphComponent.getScalingPercentage();
+                if (e.getPreciseWheelRotation() < 0) {
+
+                    if (currentScale > 60) {
+                        graphComponent.setScalingPercentage(currentScale - 10);
+                        scalingSpinner.setValue(currentScale - 10);
+                        graphComponent.repaint();
+                    }
+                } else {
+                    if (currentScale < 390) {
+                        graphComponent.setScalingPercentage(currentScale + 10);
+                        scalingSpinner.setValue(currentScale + 10);
+                        graphComponent.repaint();
+                    }
+
+                }
+
+            }
+        });
 
         ScrollPaneMouseAdapter scrollAdapter = new ScrollPaneMouseAdapter(graphHolder, graphComponent);
         graphHolder.getViewport().addMouseMotionListener(scrollAdapter);
@@ -113,67 +134,62 @@ public class MainFrame {
 
         return graphHolder;
     }
-    private JPanel createGraphAndScalingPanel(){
+
+    private JPanel createGraphAndScalingPanel() {
         JScrollPane graphHolder = createGraphHolder();
-      //  graphHolder.setPreferredSize(new Dimension(250,750));
         JPanel graphAndScalingPanel = new JPanel();
         graphAndScalingPanel.setLayout(new BoxLayout(graphAndScalingPanel, BoxLayout.Y_AXIS));
 
-
-        JPanel scalingPanel = new JPanel(new GridLayout(1,2));
+        JPanel scalingPanel = new JPanel(new GridLayout(1, 2));
         SpinnerModel scalingSpinnerModel = new SpinnerNumberModel(100, 1, 400, 50);
-        JSpinner scalingSpinner = new JSpinner(scalingSpinnerModel);
-        scalingSpinner.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                JSpinner spinner = (JSpinner) e.getSource();
-                graphComponent.setScalingPercentage((Integer)spinner.getValue());
-                graphComponent.setSize(graphComponent.getPreferredSize());
-                graphComponent.repaint();
-                System.out.println("component size is"+graphComponent.getSize());
-                System.out.println("component preferred size is"+graphComponent.getPreferredSize());
-                System.out.println("component max size is"+graphComponent.getMaximumSize());
-            }
+        scalingSpinner = new JSpinner(scalingSpinnerModel);
+        scalingSpinner.addChangeListener(e -> {
+            JSpinner spinner = (JSpinner) e.getSource();
+            graphComponent.setScalingPercentage((Integer) spinner.getValue());
+            graphComponent.setSize(graphComponent.getPreferredSize());
+            graphComponent.repaint();
+            System.out.println("component size is" + graphComponent.getSize());
+            System.out.println("component preferred size is" + graphComponent.getPreferredSize());
+            System.out.println("component max size is" + graphComponent.getMaximumSize());
         });
+
         scalingPanel.add(new JLabel("Масштаб, %"));
         scalingPanel.add(scalingSpinner);
-        scalingPanel.setPreferredSize(new Dimension(150,25));
+        scalingPanel.setPreferredSize(new Dimension(150, 25));
         scalingPanel.setMaximumSize(scalingPanel.getPreferredSize());
         scalingPanel.setSize(scalingPanel.getPreferredSize());
 
-
         graphAndScalingPanel.add(graphHolder);
         graphAndScalingPanel.add(scalingPanel);
+
         return graphAndScalingPanel;
     }
-    private void addButtonListener(){
+
+    private void addButtonListener() {
         buttonToSendData.addActionListener(e -> {
             clearTable();
             Set<String> fieldKeys = dataFields.keySet();
-            for (String key : fieldKeys){
+            for (String key : fieldKeys) {
                 dataController.setByKey(key, dataFields.get(key).getText());
             }
             dataController.createArrays();
             try {
-                if(dataController.sorting()) {
+                if (dataController.sorting()) {
                     dataTable.repaint();
                     dataTable.revalidate();
                     PointsList dataMapping = dataController.getData();
-                   // System.out.println("mapping size: "+dataMapping.getPointsList().size());
-                    //System.out.println("num of rows: "+dataTable.getModel().getRowCount());
                     graphComponent.setPointsList(dataMapping);
                     Executors.newSingleThreadExecutor().execute(() -> graphComponent.repaint());
-
                 }
 
             } catch (ExecutionException | InterruptedException e1) {
                 e1.printStackTrace();
             }
-
         });
     }
-    private void clearTable(){
-        DefaultTableModel tableModel = (DefaultTableModel)dataTable.getModel();
+
+    private void clearTable() {
+        DefaultTableModel tableModel = (DefaultTableModel) dataTable.getModel();
         tableModel.setRowCount(0);
     }
 }

@@ -6,19 +6,20 @@ public class Randomizer {
     private static volatile Randomizer instance;
     private Random randomGenerator = new Random();
 
-    public static Randomizer getInstance(){
+    public static Randomizer getInstance() {
         Randomizer localInstance = instance;
-        if(localInstance==null){
-            synchronized (Randomizer.class){
+        if (localInstance == null) {
+            synchronized (Randomizer.class) {
                 localInstance = instance;
-                if(localInstance == null){
-                    instance= localInstance= new Randomizer();
+                if (localInstance == null) {
+                    instance = localInstance = new Randomizer();
                 }
             }
         }
         return localInstance;
     }
-    public Random getRandomGenerator(){
+
+    public Random getRandomGenerator() {
         return randomGenerator;
     }
 }

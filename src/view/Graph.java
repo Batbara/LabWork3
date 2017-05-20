@@ -5,12 +5,11 @@ import model.PointsList;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Created by Batbara on 19.05.2017.
- */
 public class Graph {
 
     private static final int GRAPH_POINT_WIDTH = 8;
@@ -23,173 +22,152 @@ public class Graph {
     private PointsList graphPoints;
     private int xAxisLength;
     private int yAxisLength;
-    private int scalingPercentage;
-    public Graph(Dimension componentSize, int x_BORDER_GAP, int y_BORDER_GAP, int scalingPercentage){
-        
+    private double scalingValue;
+
+    public Graph(Dimension componentSize, int x_BORDER_GAP, int y_BORDER_GAP, int scalingPercentage) {
+
         graphPoints = new PointsList();
         this.componentSize = componentSize;
-        this.scalingPercentage = scalingPercentage;
-        this.X_BORDER_GAP = x_BORDER_GAP;
-        this.Y_BORDER_GAP = y_BORDER_GAP;
-        xAxisLength = (int)componentSize.getWidth()-(2*X_BORDER_GAP+15);
-        yAxisLength = (int)componentSize.getHeight()-(2*Y_BORDER_GAP+15);
+        this.scalingValue = (double) scalingPercentage / 100;
+        this.X_BORDER_GAP = (int) (x_BORDER_GAP * scalingValue);
+        this.Y_BORDER_GAP = (int) (y_BORDER_GAP * scalingValue);
+        xAxisLength = (int) componentSize.getWidth() - (2 * X_BORDER_GAP + 15);
+        yAxisLength = (int) componentSize.getHeight() - (2 * Y_BORDER_GAP + 15);
     }
 
-    public synchronized void  setPointsList(PointsList graphPoints) {
+    public synchronized void setPointsList(PointsList graphPoints) {
         this.graphPoints = graphPoints;
     }
 
     public void setScalingPercentage(int scalingPercentage) {
-        this.scalingPercentage = scalingPercentage;
+        this.scalingValue = (double) scalingPercentage / 100;
     }
 
-    public void paint(Graphics2D g2){
-        double scalingValue = (double)scalingPercentage/100;
-        //System.out.println("scaling value is" +  scalingValue);
+    public void paint(Graphics2D g2) {
 
         AffineTransform original = g2.getTransform();
         AffineTransform scaled = new AffineTransform(original);
-       scaled.scale(scalingValue, scalingValue);
+        scaled.scale(scalingValue, scalingValue);
         g2.setTransform(scaled);
 
         paintAxis(g2);
         paintGraphLine(g2);
-        //g2.dispose();
     }
-    public void paintAxis(Graphics2D g2){
-        double scalingValue = (double)scalingPercentage/100;
+
+    public void paintAxis(Graphics2D g2) {
+
         AffineTransform original = g2.getTransform();
         AffineTransform scaled = new AffineTransform(original);
         scaled.scale(scalingValue, scalingValue);
         g2.setTransform(scaled);
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-           // System.out.println("start draw axis");
-            double xScale = setUpAxisScale().get("x");
-            double yScale = setUpAxisScale().get("y");
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            int yPointOfOrigin = (int)componentSize.getHeight() - Y_BORDER_GAP;
-            int xPointOfOrigin = (int)componentSize.getWidth() - X_BORDER_GAP;
+        double xScale = setUpAxisScale().get("x");
+        double yScale = setUpAxisScale().get("y");
 
-            g2.drawString("0", X_BORDER_GAP,yPointOfOrigin+10);
+        int yPointOfOrigin = (int) componentSize.getHeight() - Y_BORDER_GAP;
+        int xPointOfOrigin = (int) componentSize.getWidth() - X_BORDER_GAP;
 
-            g2.drawLine(X_BORDER_GAP, yPointOfOrigin, X_BORDER_GAP, Y_BORDER_GAP);
-            g2.drawLine(X_BORDER_GAP, Y_BORDER_GAP, X_BORDER_GAP+5, Y_BORDER_GAP+10);
-            g2.drawLine(X_BORDER_GAP, Y_BORDER_GAP, X_BORDER_GAP-5, Y_BORDER_GAP+10);
-            g2.drawString("t, мкс", X_BORDER_GAP-5, Y_BORDER_GAP-5);
+        g2.drawString("0", X_BORDER_GAP, yPointOfOrigin + 10);
 
-            g2.drawLine(X_BORDER_GAP, yPointOfOrigin, xPointOfOrigin, yPointOfOrigin);
-            g2.drawLine(xPointOfOrigin, yPointOfOrigin, xPointOfOrigin-10, yPointOfOrigin-5);
-            g2.drawLine(xPointOfOrigin, yPointOfOrigin, xPointOfOrigin-10, yPointOfOrigin+5);
-            g2.drawString("n", xPointOfOrigin+5, yPointOfOrigin);
+        g2.drawLine(X_BORDER_GAP, yPointOfOrigin, X_BORDER_GAP, Y_BORDER_GAP);
+        g2.drawLine(X_BORDER_GAP, Y_BORDER_GAP, X_BORDER_GAP + 5, Y_BORDER_GAP + 10);
+        g2.drawLine(X_BORDER_GAP, Y_BORDER_GAP, X_BORDER_GAP - 5, Y_BORDER_GAP + 10);
+        g2.drawString("t, мкс", X_BORDER_GAP - 5, Y_BORDER_GAP - 5);
 
-            for (int i = 0; i < Y_MARKS_NUM; i++) {
+        g2.drawLine(X_BORDER_GAP, yPointOfOrigin, xPointOfOrigin, yPointOfOrigin);
+        g2.drawLine(xPointOfOrigin, yPointOfOrigin, xPointOfOrigin - 10, yPointOfOrigin - 5);
+        g2.drawLine(xPointOfOrigin, yPointOfOrigin, xPointOfOrigin - 10, yPointOfOrigin + 5);
+        g2.drawString("n", xPointOfOrigin + 5, yPointOfOrigin);
 
-                int x0 = X_BORDER_GAP-5;
-                int x1 = GRAPH_POINT_WIDTH + X_BORDER_GAP-5;
-                int y0 = (int)componentSize.getHeight()-( ((i + 1) * (yAxisLength+15)) / Y_MARKS_NUM  +Y_BORDER_GAP-15);
-              //  int y0=(int)componentSize.getHeight() - (((i + 1) * ((int)componentSize.getHeight() - Y_BORDER_GAP * 2)) / Y_MARKS_NUM + Y_BORDER_GAP-15);
-                int y1 = y0;
-                if(!(yScale==0)) {
+        for (int i = 0; i < Y_MARKS_NUM; i++) {
 
-                    int label = (int) Math.round((double) yScale * (yAxisLength+15 -y0+Y_BORDER_GAP));
+            int x0 = X_BORDER_GAP - 5;
+            int x1 = GRAPH_POINT_WIDTH + X_BORDER_GAP - 5;
+            int y0 = (int) componentSize.getHeight() - (((i + 1) * (yAxisLength + 15)) / Y_MARKS_NUM + Y_BORDER_GAP - 15);
+            int y1 = y0;
+            if (!(yScale == 0)) {
 
-                    g2.drawString(Integer.toString(label), x1 - (X_BORDER_GAP-6), y1+7);
-                }
-                g2.drawLine(x0, y0, x1, y1);
+                int label = (int) Math.round(yScale * (yAxisLength + 15 - y0 + Y_BORDER_GAP));
+
+                g2.drawString(Integer.toString(label), x1 - (X_BORDER_GAP - 6), y1 + 7);
             }
-
-
-            for (int i = 0; i < X_MARKS_NUM; i++) {
-                int x0 = (i + 1) * (xAxisLength) / X_MARKS_NUM + X_BORDER_GAP;
-                int x1 = x0;
-                int y0 =yPointOfOrigin+5;
-                int y1 = y0 - GRAPH_POINT_WIDTH;
-                if(!(xScale==0)) {
-
-                    int label = (int) Math.ceil((double) xScale * (x0-X_BORDER_GAP));
-                    g2.drawString(Integer.toString(label), x1-7, y1+30);
-                }
-                g2.drawLine(x0, y0, x1, y1);
-            }
-            //g2.dispose();
+            g2.drawLine(x0, y0, x1, y1);
         }
 
+        for (int i = 0; i < X_MARKS_NUM; i++) {
+            int x0 = (i + 1) * (xAxisLength) / X_MARKS_NUM + X_BORDER_GAP;
+            int x1 = x0;
+            int y0 = yPointOfOrigin + 5;
+            int y1 = y0 - GRAPH_POINT_WIDTH;
+            if (!(xScale == 0)) {
+
+                int label = (int) Math.ceil(xScale * (x0 - X_BORDER_GAP));
+                g2.drawString(Integer.toString(label), x1 - 7, y1 + 30);
+            }
+            g2.drawLine(x0, y0, x1, y1);
+        }
+    }
+
     public synchronized void paintGraphLine(Graphics2D g2) {
-        double scalingValue = (double)scalingPercentage/100;
-        AffineTransform original = g2.getTransform();
-        AffineTransform scaled = new AffineTransform(original);
-        scaled.scale(scalingValue, scalingValue);
-        g2.setTransform(scaled);
-       // g2.scale(scalingValue, scalingValue);
+
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(Color.red);
-        g2.setStroke( new BasicStroke(3f));
+        g2.setStroke(new BasicStroke(3f));
         double xScale = setUpAxisScale().get("xCoordinates");
         double yScale = setUpAxisScale().get("yCoordinates");
 
         graphPoints.setScaling(xScale, yScale);
         List<PointCoordinates> listOfCoordinates = graphPoints.getListOfCoordinates();
 
-        for (int point=0; point<listOfCoordinates.size()-1; point++){
+        for (int point = 0; point < listOfCoordinates.size() - 1; point++) {
             PointCoordinates firstPointCoordinates = listOfCoordinates.get(point);
-            PointCoordinates secondPointCoordinates = listOfCoordinates.get(point+1);
+            PointCoordinates secondPointCoordinates = listOfCoordinates.get(point + 1);
 
-            int x = X_BORDER_GAP+firstPointCoordinates.getX();
-            int y = (yAxisLength+15)+ Y_BORDER_GAP - firstPointCoordinates.getY();
+            int x = X_BORDER_GAP + firstPointCoordinates.getX();
+            int y = (yAxisLength + 15) + Y_BORDER_GAP - firstPointCoordinates.getY();
 
-            int x2 = X_BORDER_GAP+secondPointCoordinates.getX();
-            int y2 = (yAxisLength+15)+Y_BORDER_GAP - secondPointCoordinates.getY();
+            int x2 = X_BORDER_GAP + secondPointCoordinates.getX();
+            int y2 = (yAxisLength + 15) + Y_BORDER_GAP - secondPointCoordinates.getY();
 
             g2.setColor(Color.red);
             int ovalW = GRAPH_POINT_WIDTH;
             int ovalH = GRAPH_POINT_WIDTH;
-            g2.fillOval(x  - GRAPH_POINT_WIDTH / 2, y  - GRAPH_POINT_WIDTH / 2, ovalW, ovalH);
-            if(point==listOfCoordinates.size()-2)
-                g2.fillOval(x2  - GRAPH_POINT_WIDTH / 2, y2  - GRAPH_POINT_WIDTH / 2, ovalW, ovalH);
+            g2.fillOval(x - GRAPH_POINT_WIDTH / 2, y - GRAPH_POINT_WIDTH / 2, ovalW, ovalH);
+            if (point == listOfCoordinates.size() - 2)
+                g2.fillOval(x2 - GRAPH_POINT_WIDTH / 2, y2 - GRAPH_POINT_WIDTH / 2, ovalW, ovalH);
 
             g2.setColor(Color.blue);
             g2.drawLine(x, y, x2, y2);
-            System.out.println("drawing a line!");
-          //  g2.dispose();
+
         }
 
     }
 
-    private  Map<String, Double> setUpAxisScale(){
+    private Map<String, Double> setUpAxisScale() {
         Map<String, Double> scaling = new HashMap<>();
-        try {
-            Set<Integer> allNumberOfElements = graphPoints.getXSet();
-        }catch (NullPointerException e){
-            scaling.put("x",(double)0);
-            scaling.put("y", (double)0);
-            return scaling;
-        }
         Set<Integer> allNumberOfElements = graphPoints.getXSet();
         Long maxTime = 0L;
         Integer maxNumberOfElements = 0;
 
-        for (Integer elements : allNumberOfElements){
-            if(graphPoints.getTime(elements)>maxTime)
-                maxTime= graphPoints.getTime(elements);
-            if(elements>maxNumberOfElements)
-                maxNumberOfElements=elements;
+        for (Integer elements : allNumberOfElements) {
+            if (graphPoints.getTime(elements) > maxTime)
+                maxTime = graphPoints.getTime(elements);
+            if (elements > maxNumberOfElements)
+                maxNumberOfElements = elements;
         }
 
-        double yScale = (double)maxTime/ yAxisLength;
-        double xScale = (double)maxNumberOfElements/ xAxisLength;
+        double yScale = (double) maxTime / yAxisLength;
+        double xScale = (double) maxNumberOfElements / xAxisLength;
 
-        double xCoordinateScale = (double) xAxisLength /maxNumberOfElements;
-        double yCoordinatesScale = (double) yAxisLength /maxTime;
+        double xCoordinateScale = (double) xAxisLength / maxNumberOfElements;
+        double yCoordinatesScale = (double) yAxisLength / maxTime;
 
-        scaling.put("x",xScale);
+        scaling.put("x", xScale);
         scaling.put("y", yScale);
         scaling.put("xCoordinates", xCoordinateScale);
         scaling.put("yCoordinates", yCoordinatesScale);
 
         return scaling;
-    }
-
-    public PointsList getGraphPoints() {
-        return graphPoints;
     }
 }

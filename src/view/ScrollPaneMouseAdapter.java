@@ -2,25 +2,25 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 public class ScrollPaneMouseAdapter implements MouseListener, MouseMotionListener {
     private Point startPoint;
-    private Point endPoint;
     private JScrollPane scrollPane;
     private GraphComponent graphComponent;
-    public ScrollPaneMouseAdapter(JScrollPane scrollPane, GraphComponent graphComponent){
+
+    public ScrollPaneMouseAdapter(JScrollPane scrollPane, GraphComponent graphComponent) {
         this.scrollPane = scrollPane;
         this.graphComponent = graphComponent;
         startPoint = new Point();
-        endPoint = new Point();
     }
 
     public void mouseDragged(MouseEvent e) {
-        //System.out.println("position is "+e.getX()+", "+e.getY());
         JViewport viewPort = scrollPane.getViewport();
         Point viewPortPosition = viewPort.getViewPosition();
-        viewPortPosition.translate((int)startPoint.getX()-e.getX(),(int)startPoint.getY()-e.getY());
+        viewPortPosition.translate((int) startPoint.getX() - e.getX(), (int) startPoint.getY() - e.getY());
         graphComponent.scrollRectToVisible(new Rectangle(viewPortPosition, viewPort.getSize()));
     }
 
@@ -41,7 +41,6 @@ public class ScrollPaneMouseAdapter implements MouseListener, MouseMotionListene
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        endPoint = e.getPoint();
     }
 
     @Override

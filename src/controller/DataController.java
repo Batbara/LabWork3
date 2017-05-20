@@ -1,39 +1,45 @@
 package controller;
 
-import model.*;
+import model.ArrayPack;
+import model.FunctionData;
+import model.PointsList;
+
 import javax.swing.*;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DataController {
     private FunctionData functionData;
     private JTable dataTable;
 
-    public DataController(){
+    public DataController() {
         functionData = new FunctionData();
         dataTable = new JTable();
 
     }
-    public void createArrays(){
+
+    public void createArrays() {
         functionData.createArrays();
     }
-    public void setByKey(String key, String data){
-        switch (key){
-            case "Max количество элементов:":
-            {
+
+    public void setByKey(String key, String data) {
+        switch (key) {
+            case "Max количество элементов:": {
                 try {
                     functionData.setMaxArrayLength(Integer.parseInt(data));
-                }catch (NumberFormatException e){
+                } catch (NumberFormatException e) {
                     System.err.println("NumberFormatException caught!");
                     break;
                 }
                 break;
             }
-            case "Шаг:":
-            {
+            case "Шаг:": {
                 try {
-                   functionData.setIncreasingStep(Integer.parseInt(data));
-                }catch (NumberFormatException e){
+                    functionData.setIncreasingStep(Integer.parseInt(data));
+                } catch (NumberFormatException e) {
                     System.err.println("NumberFormatException caught!");
                     break;
                 }
@@ -41,13 +47,14 @@ public class DataController {
             }
         }
     }
+
     public boolean sorting() throws ExecutionException, InterruptedException {
         setPointsList(new PointsList());
-        List<ArrayPack> arraysToProccess = functionData.getArraysToProcess();
+        List<ArrayPack> arraysToProcess = functionData.getArraysToProcess();
 
-        System.out.println("num of threads: "+arraysToProccess.size());
-        ExecutorService threadPool = Executors.newFixedThreadPool(arraysToProccess.size());
-        for (ArrayPack arrayPack : arraysToProccess) {
+        System.out.println("num of threads: " + arraysToProcess.size());
+        ExecutorService threadPool = Executors.newFixedThreadPool(arraysToProcess.size());
+        for (ArrayPack arrayPack : arraysToProcess) {
 
             threadPool.submit(new SortingAlgorithm(arrayPack, dataTable, functionData));
         }
@@ -57,10 +64,11 @@ public class DataController {
     }
 
 
-    public PointsList getData(){
+    public PointsList getData() {
         return functionData.getPointsList();
     }
-    public void setPointsList(PointsList pointsList){
+
+    public void setPointsList(PointsList pointsList) {
         functionData.getPointsList().setPointsList(pointsList);
     }
 
