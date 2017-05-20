@@ -4,6 +4,7 @@ import model.PointCoordinates;
 import model.PointsList;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.util.*;
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class Graph {
         xAxisLength = (int)componentSize.getWidth()-(2*X_BORDER_GAP+15);
         yAxisLength = (int)componentSize.getHeight()-(2*Y_BORDER_GAP+15);
     }
+
     public synchronized void  setPointsList(PointsList graphPoints) {
         this.graphPoints = graphPoints;
     }
@@ -43,16 +45,25 @@ public class Graph {
 
     public void paint(Graphics2D g2){
         double scalingValue = (double)scalingPercentage/100;
-        System.out.println("scaling value is" +  scalingValue);
-        g2.scale(scalingValue, scalingValue);
+        //System.out.println("scaling value is" +  scalingValue);
+
+        AffineTransform original = g2.getTransform();
+        AffineTransform scaled = new AffineTransform(original);
+       scaled.scale(scalingValue, scalingValue);
+        g2.setTransform(scaled);
+
         paintAxis(g2);
         paintGraphLine(g2);
+        //g2.dispose();
     }
     public void paintAxis(Graphics2D g2){
-
-           // g2.scale((double) scalingPercentage/100, (double) scalingPercentage/100);
+        double scalingValue = (double)scalingPercentage/100;
+        AffineTransform original = g2.getTransform();
+        AffineTransform scaled = new AffineTransform(original);
+        scaled.scale(scalingValue, scalingValue);
+        g2.setTransform(scaled);
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            System.out.println("start draw axis");
+           // System.out.println("start draw axis");
             double xScale = setUpAxisScale().get("x");
             double yScale = setUpAxisScale().get("y");
 
@@ -100,10 +111,16 @@ public class Graph {
                 }
                 g2.drawLine(x0, y0, x1, y1);
             }
+            //g2.dispose();
         }
 
     public synchronized void paintGraphLine(Graphics2D g2) {
-        //g2.scale((double) scalingPercentage/100, (double) scalingPercentage/100);
+        double scalingValue = (double)scalingPercentage/100;
+        AffineTransform original = g2.getTransform();
+        AffineTransform scaled = new AffineTransform(original);
+        scaled.scale(scalingValue, scalingValue);
+        g2.setTransform(scaled);
+       // g2.scale(scalingValue, scalingValue);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(Color.red);
         g2.setStroke( new BasicStroke(3f));
@@ -132,7 +149,8 @@ public class Graph {
 
             g2.setColor(Color.blue);
             g2.drawLine(x, y, x2, y2);
-
+            System.out.println("drawing a line!");
+          //  g2.dispose();
         }
 
     }

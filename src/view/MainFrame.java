@@ -4,6 +4,8 @@ import controller.DataController;
 import model.PointsList;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -26,9 +28,6 @@ public class MainFrame {
         buttonToSendData = new JButton("Построить график");
         dataFields.put("Max количество элементов:", new JTextField(10));
         dataFields.put("Шаг:", new JTextField(10));
-        JTextField scaleField = new JTextField(10);
-        scaleField.setText("100");
-        dataFields.put("Масштаб, %: ", scaleField);
 
         initFrame();
         initTable();
@@ -40,10 +39,12 @@ public class MainFrame {
 
 
         graphComponent = new GraphComponent();
+        graphComponent.setPreferredSize(new Dimension(650,400));
         graphComponent.scrollRectToVisible(new Rectangle(0,0,100,100));
-        JScrollPane graphHolder = createGraphHolder();
+        //JScrollPane graphHolder = createGraphHolder();
+        JPanel graphAndScalingPanel = createGraphAndScalingPanel();
 
-        mainFrame.add(graphHolder);
+        mainFrame.add(graphAndScalingPanel);
         }
     private void initFrame(){
         mainFrame = new JFrame("Лабораторная работа №3");
@@ -72,7 +73,7 @@ public class MainFrame {
         rowSorter.setComparator(0, elementsNumberComparator);
     }
     private JPanel createFieldsPanel(){
-        JPanel holdingPanel = new JPanel(new GridLayout(3,2));
+        JPanel holdingPanel = new JPanel(new GridLayout(2,2));
         Set<String> labels = dataFields.keySet();
         for (String label : labels ){
             holdingPanel.add(new JLabel(label));
@@ -102,7 +103,9 @@ public class MainFrame {
         graphHolder.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         graphHolder.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         graphHolder.setBackground(Color.white);
-        graphHolder.setPreferredSize(new Dimension(150,150));
+        graphHolder.setPreferredSize(new Dimension(700,450));
+        graphHolder.setMaximumSize(graphHolder.getPreferredSize());
+        graphHolder.setSize(graphHolder.getPreferredSize());
 
         ScrollPaneMouseAdapter scrollAdapter = new ScrollPaneMouseAdapter(graphHolder, graphComponent);
         graphHolder.getViewport().addMouseMotionListener(scrollAdapter);
@@ -110,19 +113,45 @@ public class MainFrame {
 
         return graphHolder;
     }
+    private JPanel createGraphAndScalingPanel(){
+        JScrollPane graphHolder = createGraphHolder();
+      //  graphHolder.setPreferredSize(new Dimension(250,750));
+        JPanel graphAndScalingPanel = new JPanel();
+        graphAndScalingPanel.setLayout(new BoxLayout(graphAndScalingPanel, BoxLayout.Y_AXIS));
+
+
+        JPanel scalingPanel = new JPanel(new GridLayout(1,2));
+        SpinnerModel scalingSpinnerModel = new SpinnerNumberModel(100, 1, 400, 50);
+        JSpinner scalingSpinner = new JSpinner(scalingSpinnerModel);
+        scalingSpinner.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                JSpinner spinner = (JSpinner) e.getSource();
+                graphComponent.setScalingPercentage((Integer)spinner.getValue());
+                graphComponent.setSize(graphComponent.getPreferredSize());
+                graphComponent.repaint();
+                System.out.println("component size is"+graphComponent.getSize());
+                System.out.println("component preferred size is"+graphComponent.getPreferredSize());
+                System.out.println("component max size is"+graphComponent.getMaximumSize());
+            }
+        });
+        scalingPanel.add(new JLabel("Масштаб, %"));
+        scalingPanel.add(scalingSpinner);
+        scalingPanel.setPreferredSize(new Dimension(150,25));
+        scalingPanel.setMaximumSize(scalingPanel.getPreferredSize());
+        scalingPanel.setSize(scalingPanel.getPreferredSize());
+
+
+        graphAndScalingPanel.add(graphHolder);
+        graphAndScalingPanel.add(scalingPanel);
+        return graphAndScalingPanel;
+    }
     private void addButtonListener(){
         buttonToSendData.addActionListener(e -> {
             clearTable();
             Set<String> fieldKeys = dataFields.keySet();
             for (String key : fieldKeys){
                 dataController.setByKey(key, dataFields.get(key).getText());
-                if ( key.equals("Масштаб, %: ")) {
-                    try {
-                        graphComponent.setScalingPercentage(Integer.parseInt(dataFields.get(key).getText()));
-                    }catch (NumberFormatException ex){
-                        System.err.println("NumberFormatException caught!");
-                    }
-                }
             }
             dataController.createArrays();
             try {

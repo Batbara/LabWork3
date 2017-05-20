@@ -17,7 +17,7 @@ public class ScrollPaneMouseAdapter implements MouseListener, MouseMotionListene
     }
 
     public void mouseDragged(MouseEvent e) {
-        System.out.println("position is "+e.getX()+", "+e.getY());
+        //System.out.println("position is "+e.getX()+", "+e.getY());
         JViewport viewPort = scrollPane.getViewport();
         Point viewPortPosition = viewPort.getViewPosition();
         viewPortPosition.translate((int)startPoint.getX()-e.getX(),(int)startPoint.getY()-e.getY());

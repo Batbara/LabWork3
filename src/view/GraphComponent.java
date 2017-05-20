@@ -36,15 +36,22 @@ public class GraphComponent extends JPanel{
     }
 
     public void setScalingPercentage(int scalingPercentage) {
+        double scalingValue = (double)scalingPrecentage/100;
         this.scalingPrecentage = scalingPercentage;
         graph.setScalingPercentage(scalingPercentage);
+//        Dimension size = getPreferredSize();
+//        this.setPreferredSize(size);
+    }
+    @Override
+    public Dimension getSize(){
+        return getPreferredSize();
     }
 
     @Override
     public Dimension getPreferredSize() {
         double scalingValue = (double)scalingPrecentage/100;
-        return new Dimension((int) (450 *scalingValue)
-                , (int) (450*scalingValue));
+        return new Dimension((int) (650 *(scalingValue*scalingValue))
+                , (int) (400*(scalingValue*scalingValue)));
     }
 
 
