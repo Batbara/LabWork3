@@ -15,18 +15,19 @@ public class Graph {
     private static final int GRAPH_POINT_WIDTH = 8;
     private static final int Y_MARKS_NUM = 10;
     private static final int X_MARKS_NUM = 10;
+
     private Dimension componentSize;
     private int X_BORDER_GAP;
     private int Y_BORDER_GAP;
     private PointsList graphPoints;
-    private PointsList pointsToPaint;
     private int xAxisLength;
     private int yAxisLength;
-    public Graph(Dimension componentSize, int x_BORDER_GAP, int y_BORDER_GAP){
+    private int scalingPercentage;
+    public Graph(Dimension componentSize, int x_BORDER_GAP, int y_BORDER_GAP, int scalingPercentage){
         
         graphPoints = new PointsList();
-        pointsToPaint = new PointsList();
         this.componentSize = componentSize;
+        this.scalingPercentage = scalingPercentage;
         this.X_BORDER_GAP = x_BORDER_GAP;
         this.Y_BORDER_GAP = y_BORDER_GAP;
         xAxisLength = (int)componentSize.getWidth()-(2*X_BORDER_GAP+15);
@@ -36,13 +37,20 @@ public class Graph {
         this.graphPoints = graphPoints;
     }
 
-    public void paint(Graphics2D g2){
+    public void setScalingPercentage(int scalingPercentage) {
+        this.scalingPercentage = scalingPercentage;
+    }
 
+    public void paint(Graphics2D g2){
+        double scalingValue = (double)scalingPercentage/100;
+        System.out.println("scaling value is" +  scalingValue);
+        g2.scale(scalingValue, scalingValue);
         paintAxis(g2);
         paintGraphLine(g2);
     }
     public void paintAxis(Graphics2D g2){
 
+           // g2.scale((double) scalingPercentage/100, (double) scalingPercentage/100);
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             System.out.println("start draw axis");
             double xScale = setUpAxisScale().get("x");
@@ -94,15 +102,8 @@ public class Graph {
             }
         }
 
-    public void markPoint(PointCoordinates markingPoint, String status){
-        for (PointCoordinates point : graphPoints.getListOfCoordinates()) {
-            if (Objects.equals(markingPoint, point)){
-                point.setPaintingStatus(status);
-            }
-        }
-    }
     public synchronized void paintGraphLine(Graphics2D g2) {
-
+        //g2.scale((double) scalingPercentage/100, (double) scalingPercentage/100);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(Color.red);
         g2.setStroke( new BasicStroke(3f));

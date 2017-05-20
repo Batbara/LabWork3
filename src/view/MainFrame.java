@@ -41,16 +41,10 @@ public class MainFrame {
 
         graphComponent = new GraphComponent();
         graphComponent.scrollRectToVisible(new Rectangle(0,0,100,100));
-        JScrollPane graphHolder = new JScrollPane(graphComponent);
-        graphHolder.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        graphHolder.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        graphHolder.setBackground(Color.white);
-        graphHolder.setPreferredSize(new Dimension(150,150));
-        //graphHolder.getViewport().setSize(new Dimension(50,50));
-        graphHolder.setVisible(true);
-        mainFrame.add(graphHolder);
+        JScrollPane graphHolder = createGraphHolder();
 
-         }
+        mainFrame.add(graphHolder);
+        }
     private void initFrame(){
         mainFrame = new JFrame("Лабораторная работа №3");
         mainFrame.setLayout(new BorderLayout());
@@ -102,12 +96,33 @@ public class MainFrame {
 
         return tableAndDataPanel;
     }
+    private JScrollPane createGraphHolder(){
+
+        JScrollPane graphHolder = new JScrollPane(graphComponent);
+        graphHolder.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        graphHolder.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        graphHolder.setBackground(Color.white);
+        graphHolder.setPreferredSize(new Dimension(150,150));
+
+        ScrollPaneMouseAdapter scrollAdapter = new ScrollPaneMouseAdapter(graphHolder, graphComponent);
+        graphHolder.getViewport().addMouseMotionListener(scrollAdapter);
+        graphHolder.getViewport().addMouseListener(scrollAdapter);
+
+        return graphHolder;
+    }
     private void addButtonListener(){
         buttonToSendData.addActionListener(e -> {
             clearTable();
             Set<String> fieldKeys = dataFields.keySet();
             for (String key : fieldKeys){
                 dataController.setByKey(key, dataFields.get(key).getText());
+                if ( key.equals("Масштаб, %: ")) {
+                    try {
+                        graphComponent.setScalingPercentage(Integer.parseInt(dataFields.get(key).getText()));
+                    }catch (NumberFormatException ex){
+                        System.err.println("NumberFormatException caught!");
+                    }
+                }
             }
             dataController.createArrays();
             try {
@@ -115,8 +130,9 @@ public class MainFrame {
                     dataTable.repaint();
                     dataTable.revalidate();
                     PointsList dataMapping = dataController.getData();
-                    System.out.println("mapping size: "+dataMapping.getPointsList().size());
-                    System.out.println("num of rows: "+dataTable.getModel().getRowCount());
+                   // System.out.println("mapping size: "+dataMapping.getPointsList().size());
+                    //System.out.println("num of rows: "+dataTable.getModel().getRowCount());
+                    graphComponent.setPointsList(dataMapping);
                     Executors.newSingleThreadExecutor().execute(() -> graphComponent.repaint());
 
                 }

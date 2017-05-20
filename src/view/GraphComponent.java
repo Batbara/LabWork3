@@ -10,12 +10,14 @@ public class GraphComponent extends JPanel{
 
     private static final int X_BORDER_GAP = 45;
     private static final int Y_BORDER_GAP = 30;
+    private int scalingPrecentage;
 
     private Graph graph;
 
     public GraphComponent(){
         super();
-        graph = new Graph(getPreferredSize(),X_BORDER_GAP,Y_BORDER_GAP);
+        scalingPrecentage = 100;
+        graph = new Graph(getPreferredSize(),X_BORDER_GAP,Y_BORDER_GAP, scalingPrecentage);
         this.setBackground(Color.white);
     }
 
@@ -33,9 +35,16 @@ public class GraphComponent extends JPanel{
         graph.setPointsList(functionData);
     }
 
+    public void setScalingPercentage(int scalingPercentage) {
+        this.scalingPrecentage = scalingPercentage;
+        graph.setScalingPercentage(scalingPercentage);
+    }
+
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(450 , 450);
+        double scalingValue = (double)scalingPrecentage/100;
+        return new Dimension((int) (450 *scalingValue)
+                , (int) (450*scalingValue));
     }
 
 

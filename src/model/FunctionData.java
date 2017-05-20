@@ -32,6 +32,7 @@ public class FunctionData {
         this.maxArrayLength = maxArrayLength;
     }
 
+
     public PointsList getPointsList() {
         return pointsList;
     }
