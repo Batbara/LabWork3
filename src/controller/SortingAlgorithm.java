@@ -66,26 +66,55 @@ public class SortingAlgorithm implements Runnable {
         if (length < 2)
             return array;
         int middle = length / 2;
-        return merge(sortMerge(Arrays.copyOfRange(array, 0, middle)),
-                sortMerge(Arrays.copyOfRange(array, middle, length)));
+        Integer[] rightPart = Arrays.copyOfRange(array, 0, middle);
+        Integer[] leftPart = Arrays.copyOfRange(array, middle, length);
+        return merge(sortMerge(rightPart),
+                sortMerge(leftPart));
     }
 
-    private Integer[] merge(Integer[] firstArray, Integer[] secondArray) {
-        int firstLength = firstArray.length, secondLength = secondArray.length;
-        int elementFirstArr = 0, elementSecondArr = 0, length = firstLength + secondLength;
+    private Integer[] merge(Integer[] rightHalf, Integer[] leftHalf) {
+        int rightHalfLength = rightHalf.length;
+        int leftHalfLength = leftHalf.length;
+
+        int rightHalfPointer = 0, leftHalfPointer = 0, length = rightHalfLength + leftHalfLength;
         Integer[] result = new Integer[length];
-        for (int i = 0; i < length; i++) {
-            if (elementSecondArr < secondLength && elementFirstArr < firstLength) {
-                if (firstArray[elementFirstArr] > secondArray[elementSecondArr])
-                    result[i] = secondArray[elementSecondArr++];
-                else result[i] = firstArray[elementFirstArr++];
-            } else if (elementSecondArr < secondLength) {
-                result[i] = secondArray[elementSecondArr++];
-            } else {
-                result[i] = firstArray[elementFirstArr++];
+
+        for (int element = 0; element < length; element++) {
+
+            if(!isArrayEnded(leftHalf, leftHalfPointer) &&
+                    !isArrayEnded(rightHalf, rightHalfPointer)) {
+
+                int elementFromRightHalf = rightHalf[rightHalfPointer];
+                int elementFromLeftHalf = leftHalf[leftHalfPointer];
+
+                if (elementFromRightHalf > elementFromLeftHalf) {
+                    result[element] = elementFromLeftHalf;
+                    leftHalfPointer=shift(leftHalfPointer);
+                }
+                else {
+                    result[element] = elementFromRightHalf;
+                    rightHalfPointer=shift(rightHalfPointer);
+                }
+            }
+            else
+                if (!isArrayEnded(leftHalf, leftHalfPointer)) {
+                    int elementFromLeftHalf = leftHalf[leftHalfPointer];
+                    result[element] = elementFromLeftHalf;
+                    leftHalfPointer=shift(leftHalfPointer);
+                }
+                else {
+                    int elementFromRightHalf = rightHalf[rightHalfPointer];
+                    result[element] = elementFromRightHalf;
+                    rightHalfPointer=shift(rightHalfPointer);
             }
         }
         return result;
+    }
+    private int shift(int counter){
+        return counter+1;
+    }
+    private boolean isArrayEnded(Integer[]array, int currElementIndex){
+        return currElementIndex >= array.length;
     }
 
 }
