@@ -21,6 +21,9 @@ public class RandomArray {
             randomArray.add(randomGenerator.nextInt());
         }
     }
+    public int size(){
+        return randomArray.size();
+    }
 
     public Object[] getRandomArray() {
         return randomArray.toArray();

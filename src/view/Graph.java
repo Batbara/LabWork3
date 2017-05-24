@@ -43,12 +43,8 @@ public class Graph {
 
     public void paint(Graphics2D g2){
 
-        AffineTransform original = g2.getTransform();
-        AffineTransform scaled = new AffineTransform(original);
-       scaled.scale(scalingValue, scalingValue);
-        g2.setTransform(scaled);
-
         paintAxis(g2);
+
         paintGraphLine(g2);
     }
     public void paintAxis(Graphics2D g2){
@@ -106,7 +102,7 @@ public class Graph {
             }
         }
 
-    public synchronized void paintGraphLine(Graphics2D g2) {
+    private synchronized void paintGraphLine(Graphics2D g2) {
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setStroke( new BasicStroke(3f));
@@ -135,8 +131,8 @@ public class Graph {
             if(point==listOfCoordinates.size()-2)
                 g2.fillOval(x2  - GRAPH_POINT_WIDTH / 2, y2  - GRAPH_POINT_WIDTH / 2, ovalW, ovalH);
 
-
         }
+
 
     }
 

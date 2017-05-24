@@ -1,8 +1,8 @@
 package controller;
 
-import model.ArrayPack;
 import model.FunctionData;
 import model.PointsList;
+import model.RandomArray;
 
 import javax.swing.*;
 import java.util.List;
@@ -50,11 +50,11 @@ public class DataController {
 
     public boolean sorting() throws ExecutionException, InterruptedException {
         setPointsList(new PointsList());
-        List<ArrayPack> arraysToProcess = functionData.getArraysToProcess();
+        List<RandomArray> arraysToProcess = functionData.getArraysToProcess();
 
         System.out.println("num of threads: " + arraysToProcess.size());
         ExecutorService threadPool = Executors.newFixedThreadPool(arraysToProcess.size());
-        for (ArrayPack arrayPack : arraysToProcess) {
+        for (RandomArray arrayPack : arraysToProcess) {
 
             threadPool.submit(new SortingAlgorithm(arrayPack, dataTable, functionData));
         }
