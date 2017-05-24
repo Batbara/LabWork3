@@ -19,8 +19,9 @@ public class ScrollPaneMouseAdapter implements MouseListener, MouseMotionListene
 
     public void mouseDragged(MouseEvent e) {
         JViewport viewPort = scrollPane.getViewport();
+        graphComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
         Point viewPortPosition = viewPort.getViewPosition();
-        viewPortPosition.translate((int) startPoint.getX() - e.getX(), (int) startPoint.getY() - e.getY());
+        viewPortPosition.translate((int) startPoint.getX() - e.getX()+10, (int) startPoint.getY() - e.getY()+10);
         graphComponent.scrollRectToVisible(new Rectangle(viewPortPosition, viewPort.getSize()));
     }
 
@@ -41,6 +42,7 @@ public class ScrollPaneMouseAdapter implements MouseListener, MouseMotionListene
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        graphComponent.setCursor(Cursor.getDefaultCursor());
     }
 
     @Override

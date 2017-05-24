@@ -6,6 +6,7 @@ import model.PointsList;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseWheelEvent;
 import java.util.LinkedHashMap;
@@ -108,21 +109,23 @@ public class MainFrame {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 super.mouseWheelMoved(e);
-                int currentScale = graphComponent.getScalingPercentage();
-                if (e.getPreciseWheelRotation() < 0) {
+                if((e.getModifiers() & InputEvent.CTRL_MASK)==InputEvent.CTRL_MASK) {
+                    int currentScale = graphComponent.getScalingPercentage();
+                    if (e.getPreciseWheelRotation() < 0) {
 
-                    if (currentScale > 60) {
-                        graphComponent.setScalingPercentage(currentScale - 10);
-                        scalingSpinner.setValue(currentScale - 10);
-                        graphComponent.repaint();
-                    }
-                } else {
-                    if (currentScale < 390) {
-                        graphComponent.setScalingPercentage(currentScale + 10);
-                        scalingSpinner.setValue(currentScale + 10);
-                        graphComponent.repaint();
-                    }
+                        if (currentScale > 50) {
+                            graphComponent.setScalingPercentage(currentScale - 5);
+                            scalingSpinner.setValue(currentScale - 5);
+                            graphComponent.repaint();
+                        }
+                    } else {
+                        if (currentScale < 200) {
+                            graphComponent.setScalingPercentage(currentScale + 5);
+                            scalingSpinner.setValue(currentScale + 5);
+                            graphComponent.repaint();
+                        }
 
+                    }
                 }
 
             }
@@ -131,7 +134,6 @@ public class MainFrame {
         ScrollPaneMouseAdapter scrollAdapter = new ScrollPaneMouseAdapter(graphHolder, graphComponent);
         graphHolder.getViewport().addMouseMotionListener(scrollAdapter);
         graphHolder.getViewport().addMouseListener(scrollAdapter);
-
         return graphHolder;
     }
 
@@ -141,7 +143,7 @@ public class MainFrame {
         graphAndScalingPanel.setLayout(new BoxLayout(graphAndScalingPanel, BoxLayout.Y_AXIS));
 
         JPanel scalingPanel = new JPanel(new GridLayout(1, 2));
-        SpinnerModel scalingSpinnerModel = new SpinnerNumberModel(100, 1, 400, 50);
+        SpinnerModel scalingSpinnerModel = new SpinnerNumberModel(100, 1, 150, 5);
         scalingSpinner = new JSpinner(scalingSpinnerModel);
         scalingSpinner.addChangeListener(e -> {
             JSpinner spinner = (JSpinner) e.getSource();

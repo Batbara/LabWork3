@@ -32,6 +32,7 @@ public class SortingAlgorithm implements Runnable {
 
     public void run() {
 
+
         System.out.println(thread.getName() + " is running!");
         synchronized (packToSort) {
             List<Long> sortingTime = new ArrayList<>();
@@ -47,7 +48,10 @@ public class SortingAlgorithm implements Runnable {
             for (Long time : sortingTime) {
                 averageTime += time;
             }
+            System.out.println(averageTime);
+            System.out.println(sortingTime.size());
             averageTime = averageTime / sortingTime.size();
+            System.out.println(averageTime);
             functionData.getPointsList().addPoint(eachArrayLength, averageTime);
             updateTable();
         }

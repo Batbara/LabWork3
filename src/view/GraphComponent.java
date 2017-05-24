@@ -5,7 +5,7 @@ import model.PointsList;
 import javax.swing.*;
 import java.awt.*;
 
-public class GraphComponent extends JPanel {
+public class GraphComponent extends JComponent {
 
     private static final int X_BORDER_GAP = 45;
     private static final int Y_BORDER_GAP = 30;
@@ -17,14 +17,12 @@ public class GraphComponent extends JPanel {
         super();
         scalingPercentage = 100;
         graph = new Graph(getPreferredSize(), X_BORDER_GAP, Y_BORDER_GAP, scalingPercentage);
-        this.setBackground(Color.white);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        g2.setBackground(Color.white);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graph.paint(g2);
     }
