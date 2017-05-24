@@ -1,6 +1,5 @@
 package controller;
 
-import model.ArrayPack;
 import model.FunctionData;
 import model.RandomArray;
 import model.TableRow;
@@ -13,52 +12,48 @@ import java.util.List;
 
 public class SortingAlgorithm implements Runnable {
 
-    private ArrayPack packToSort;
-    private Integer eachArrayLength;
+    private RandomArray arrayToSort;
+    private Integer arrayLength;
     private JTable dataTable;
     private FunctionData functionData;
     private Long averageTime;
     private Thread thread;
 
-    public SortingAlgorithm(ArrayPack packToSort, JTable dataTable, FunctionData functionData) {
-        this.packToSort = packToSort;
+    public SortingAlgorithm(RandomArray randomArray, JTable dataTable, FunctionData functionData) {
+        this.arrayToSort = randomArray;
         this.dataTable = dataTable;
         this.functionData = functionData;
 
         averageTime = 0L;
-        eachArrayLength = packToSort.getPackArraysLength();
-        thread = new Thread(this, "thread with n = " + eachArrayLength);
+        arrayLength = randomArray.size();
+        thread = new Thread(this, "thread with n = " + arrayLength);
     }
 
     public void run() {
-
+        int SORTING_TIMES = 10000;
 
         System.out.println(thread.getName() + " is running!");
-        synchronized (packToSort) {
-            List<Long> sortingTime = new ArrayList<>();
-            for (RandomArray array : packToSort.getArrayPack()) {
+        synchronized (arrayToSort) {
+            averageTime = 0L;
+            for (int sortCount = 0; sortCount<SORTING_TIMES; sortCount++) {
                 long startingTime = System.nanoTime();
-                Integer[] arrayToSort = Arrays.copyOf(array.getRandomArray(), eachArrayLength, Integer[].class);
+                Integer[] arrayToSort = Arrays.copyOf(this.arrayToSort.getRandomArray(), arrayLength, Integer[].class);
                 sortMerge(arrayToSort);
                 long endTime = System.nanoTime();
-                long elapsedTime = (endTime - startingTime) / 1000;
-                sortingTime.add(elapsedTime);
-            }
-            averageTime = 0L;
-            for (Long time : sortingTime) {
-                averageTime += time;
+                long elapsedTime = (endTime - startingTime);
+               averageTime+=elapsedTime;
             }
             System.out.println(averageTime);
-            System.out.println(sortingTime.size());
-            averageTime = averageTime / sortingTime.size();
+            System.out.println(SORTING_TIMES);
+            averageTime = averageTime / (SORTING_TIMES*1000);
             System.out.println(averageTime);
-            functionData.getPointsList().addPoint(eachArrayLength, averageTime);
+            functionData.getPointsList().addPoint(arrayLength, averageTime);
             updateTable();
         }
     }
 
     private synchronized void updateTable() {
-        TableRow row = new TableRow(eachArrayLength, averageTime);
+        TableRow row = new TableRow(arrayLength, averageTime);
         DefaultTableModel tableModel = (DefaultTableModel) dataTable.getModel();
         tableModel.addRow(row.getRow());
         dataTable.repaint();

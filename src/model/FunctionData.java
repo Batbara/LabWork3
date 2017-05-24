@@ -7,7 +7,7 @@ public class FunctionData {
     private int increasingStep;
     private int maxArrayLength;
     private PointsList pointsList;
-    private List<ArrayPack> arraysToProcess;
+    private List<RandomArray> arraysToProcess;
 
     public FunctionData() {
         maxArrayLength = 0;
@@ -21,8 +21,8 @@ public class FunctionData {
         arraysToProcess = new ArrayList<>();
         int MIN_ARRAY_LENGTH = 2;
         for (int array = MIN_ARRAY_LENGTH; array < maxArrayLength; array += increasingStep) {
-            ArrayPack arrayPack = new ArrayPack(array);
-            arraysToProcess.add(arrayPack);
+            RandomArray randomArray = new RandomArray(array);
+            arraysToProcess.add(randomArray);
         }
     }
 
@@ -39,7 +39,7 @@ public class FunctionData {
         return pointsList;
     }
 
-    public List<ArrayPack> getArraysToProcess() {
+    public List<RandomArray> getArraysToProcess() {
         return arraysToProcess;
     }
 }
