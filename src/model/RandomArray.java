@@ -21,7 +21,8 @@ public class RandomArray {
             randomArray.add(randomGenerator.nextInt());
         }
     }
-    public int size(){
+
+    public int size() {
         return randomArray.size();
     }
 

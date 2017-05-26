@@ -3,13 +3,12 @@ package model;
 import java.util.*;
 
 public class PointsList {
-    private List<PointCoordinates> listOfCoordinates;
-    private Map<Integer, Long> pointsList;
+    private List<Point> pointsList;
     private double xScale;
     private double yScale;
 
     public PointsList() {
-        pointsList = new HashMap<>();
+        pointsList = new ArrayList<>();
         xScale = 0d;
         yScale = 0d;
     }
@@ -18,8 +17,9 @@ public class PointsList {
         this.pointsList = newList.pointsList;
     }
 
-    public void addPoint(Integer numberOfArrays, Long elapsedTime) {
-        pointsList.put(numberOfArrays, elapsedTime);
+    public void addPoint(Point pointToAdd) {
+
+        pointsList.add(pointToAdd);
     }
 
     public void setScaling(double xScale, double yScale) {
@@ -27,21 +27,16 @@ public class PointsList {
         this.yScale = yScale;
     }
 
-    public Set<Integer> getXSet() {
-        return pointsList.keySet();
-    }
-
-    public Long getTime(Integer xValue) {
-        return pointsList.get(xValue);
+    public List<Point> getPointsList() {
+        return pointsList;
     }
 
     public List<PointCoordinates> getListOfCoordinates() {
-        listOfCoordinates = new ArrayList<>();
+        List<PointCoordinates> listOfCoordinates = new ArrayList<>();
 
-        for (Integer xValue : getXSet()) {
-
-            Integer xCoordinate = (int) Math.ceil(xValue * xScale);
-            Integer yCoordinate = (int) Math.ceil(pointsList.get(xValue) * yScale);
+        for (Point point : pointsList){
+            Integer xCoordinate = (int) Math.ceil(point.getNumberOfElements() * xScale);
+            Integer yCoordinate = (int) Math.ceil(point.getTime() * yScale);
             PointCoordinates pointCoordinates = new PointCoordinates(xCoordinate, yCoordinate);
             listOfCoordinates.add(pointCoordinates);
         }

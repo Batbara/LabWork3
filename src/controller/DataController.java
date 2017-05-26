@@ -3,21 +3,21 @@ package controller;
 import model.FunctionData;
 import model.PointsList;
 import model.RandomArray;
+import view.GraphComponent;
 
 import javax.swing.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class DataController {
     private FunctionData functionData;
     private JTable dataTable;
+    private GraphComponent graphComponent;
 
     public DataController() {
         functionData = new FunctionData();
         dataTable = new JTable();
+        graphComponent = new GraphComponent();
 
     }
 
@@ -48,24 +48,13 @@ public class DataController {
         }
     }
 
-    public boolean sorting() throws ExecutionException, InterruptedException {
+    public void sorting() throws ExecutionException, InterruptedException {
         setPointsList(new PointsList());
         List<RandomArray> arraysToProcess = functionData.getArraysToProcess();
 
-        System.out.println("num of threads: " + arraysToProcess.size());
-        ExecutorService threadPool = Executors.newFixedThreadPool(arraysToProcess.size());
-        for (RandomArray arrayPack : arraysToProcess) {
-
-            threadPool.submit(new SortingAlgorithm(arrayPack, dataTable, functionData));
-        }
-        threadPool.shutdown();
-        boolean finished = threadPool.awaitTermination(500, TimeUnit.DAYS);
-        return finished;
-    }
-
-
-    public PointsList getData() {
-        return functionData.getPointsList();
+        SortingAlgorithm algorithm = new SortingAlgorithm(arraysToProcess, dataTable, functionData, graphComponent);
+        Thread processing = new Thread(algorithm);
+        processing.start();
     }
 
     public void setPointsList(PointsList pointsList) {
@@ -76,4 +65,7 @@ public class DataController {
         this.dataTable = dataTable;
     }
 
+    public void setGraphComponent(GraphComponent graphComponent) {
+        this.graphComponent = graphComponent;
+    }
 }

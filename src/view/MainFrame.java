@@ -13,7 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 public class MainFrame {
 
@@ -43,6 +42,7 @@ public class MainFrame {
         graphComponent = new GraphComponent();
         graphComponent.setPreferredSize(new Dimension(650, 400));
         graphComponent.scrollRectToVisible(new Rectangle(0, 0, 100, 100));
+        dataController.setGraphComponent(graphComponent);
 
         scalingSpinner = new JSpinner();
         JPanel graphAndScalingPanel = createGraphAndScalingPanel();
@@ -109,7 +109,7 @@ public class MainFrame {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 super.mouseWheelMoved(e);
-                if((e.getModifiers() & InputEvent.CTRL_MASK)==InputEvent.CTRL_MASK) {
+                if ((e.getModifiers() & InputEvent.CTRL_MASK) == InputEvent.CTRL_MASK) {
                     int currentScale = graphComponent.getScalingPercentage();
                     if (e.getPreciseWheelRotation() < 0) {
 
@@ -150,9 +150,9 @@ public class MainFrame {
             graphComponent.setScalingPercentage((Integer) spinner.getValue());
             graphComponent.setSize(graphComponent.getPreferredSize());
             graphComponent.repaint();
-            System.out.println("component size is" + graphComponent.getSize());
-            System.out.println("component preferred size is" + graphComponent.getPreferredSize());
-            System.out.println("component max size is" + graphComponent.getMaximumSize());
+//            System.out.println("component size is" + graphComponent.getSize());
+//            System.out.println("component preferred size is" + graphComponent.getPreferredSize());
+//            System.out.println("component max size is" + graphComponent.getMaximumSize());
         });
 
         scalingPanel.add(new JLabel("Масштаб, %"));
@@ -170,19 +170,14 @@ public class MainFrame {
     private void addButtonListener() {
         buttonToSendData.addActionListener(e -> {
             clearTable();
+            graphComponent.setPointsList(new PointsList());
             Set<String> fieldKeys = dataFields.keySet();
             for (String key : fieldKeys) {
                 dataController.setByKey(key, dataFields.get(key).getText());
             }
             dataController.createArrays();
             try {
-                if (dataController.sorting()) {
-                    dataTable.repaint();
-                    dataTable.revalidate();
-                    PointsList dataMapping = dataController.getData();
-                    graphComponent.setPointsList(dataMapping);
-                    Executors.newSingleThreadExecutor().execute(() -> graphComponent.repaint());
-                }
+                dataController.sorting();
 
             } catch (ExecutionException | InterruptedException e1) {
                 e1.printStackTrace();

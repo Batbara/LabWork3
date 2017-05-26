@@ -27,7 +27,6 @@ public class GraphComponent extends JComponent {
         graph.paint(g2);
     }
 
-
     public void setPointsList(PointsList functionData) {
         graph.setPointsList(functionData);
     }
@@ -39,6 +38,10 @@ public class GraphComponent extends JComponent {
 
     public int getScalingPercentage() {
         return scalingPercentage;
+    }
+
+    public Graph getGraph() {
+        return graph;
     }
 
     @Override

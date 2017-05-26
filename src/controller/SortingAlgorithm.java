@@ -1,63 +1,83 @@
 package controller;
 
 import model.FunctionData;
+import model.Point;
 import model.RandomArray;
 import model.TableRow;
+import view.Graph;
+import view.GraphComponent;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class SortingAlgorithm implements Runnable {
 
-    private RandomArray arrayToSort;
-    private Integer arrayLength;
+    private List<RandomArray> arraysToSort;
     private JTable dataTable;
+    private GraphComponent graphComponent;
     private FunctionData functionData;
-    private Long averageTime;
-    private Thread thread;
 
-    public SortingAlgorithm(RandomArray randomArray, JTable dataTable, FunctionData functionData) {
-        this.arrayToSort = randomArray;
+    public SortingAlgorithm(List<RandomArray> arraysToSort, JTable dataTable, FunctionData functionData,
+                            GraphComponent graphComponent) {
+        this.arraysToSort = arraysToSort;
         this.dataTable = dataTable;
         this.functionData = functionData;
+        this.graphComponent = graphComponent;
 
-        averageTime = 0L;
-        arrayLength = randomArray.size();
-        thread = new Thread(this, "thread with n = " + arrayLength);
     }
 
     public void run() {
 
-        runSorting();
-        functionData.getPointsList().addPoint(arrayLength, averageTime);
-        updateTable();
+        for (RandomArray randomArray : arraysToSort) {
+            Point newPoint = getSortedData(randomArray);
+            functionData.getPointsList().addPoint(newPoint);
+            if (SwingUtilities.isEventDispatchThread()) {
+
+                updateTable(newPoint);
+                updateGraph(newPoint);
+            } else {
+                SwingUtilities.invokeLater(() -> {
+
+                    updateTable(newPoint);
+                    updateGraph(newPoint);
+                });
+            }
+        }
 
     }
 
-    private synchronized void runSorting(){
-        int SORTING_TIMES = 10000;
-        averageTime = 0L;
+    private Point getSortedData(RandomArray array) {
+        int SORTING_TIMES = 100;
+        Long averageTime = 0L;
         long startingTime = System.nanoTime();
-        for (int sortCount = 0; sortCount<SORTING_TIMES; sortCount++) {
 
-            Integer[] arrayToSort = Arrays.copyOf(this.arrayToSort.getRandomArray(), arrayLength, Integer[].class);
+        int arrayLength = array.size();
+        for (int sortCount = 0; sortCount < SORTING_TIMES; sortCount++) {
+
+            Integer[] arrayToSort = Arrays.copyOf(array.getRandomArray(), arrayLength, Integer[].class);
             sortMerge(arrayToSort);
         }
         long endTime = System.nanoTime();
         long elapsedTime = (endTime - startingTime);
-        averageTime+=elapsedTime;
-        averageTime = averageTime / (SORTING_TIMES*1000);
+        averageTime += elapsedTime;
+        averageTime = averageTime / (SORTING_TIMES * 1000);
+        return new Point(averageTime, arrayLength);
     }
 
-    private synchronized void updateTable() {
-        TableRow row = new TableRow(arrayLength, averageTime);
+    private synchronized void updateTable(Point newPoint) {
+        TableRow row = new TableRow(newPoint.getNumberOfElements(), newPoint.getTime());
         DefaultTableModel tableModel = (DefaultTableModel) dataTable.getModel();
         tableModel.addRow(row.getRow());
         dataTable.repaint();
         dataTable.revalidate();
+    }
+
+    private synchronized void updateGraph(Point newPoint) {
+        Graph graph = graphComponent.getGraph();
+        graph.getGraphPoints().addPoint(newPoint);
+        graphComponent.repaint();
     }
 
     private Integer[] sortMerge(Integer[] array) {
@@ -80,7 +100,7 @@ public class SortingAlgorithm implements Runnable {
 
         for (int element = 0; element < length; element++) {
 
-            if(!isArrayEnded(leftHalf, leftHalfPointer) &&
+            if (!isArrayEnded(leftHalf, leftHalfPointer) &&
                     !isArrayEnded(rightHalf, rightHalfPointer)) {
 
                 int elementFromRightHalf = rightHalf[rightHalfPointer];
@@ -88,31 +108,29 @@ public class SortingAlgorithm implements Runnable {
 
                 if (elementFromRightHalf > elementFromLeftHalf) {
                     result[element] = elementFromLeftHalf;
-                    leftHalfPointer=shift(leftHalfPointer);
-                }
-                else {
+                    leftHalfPointer = shift(leftHalfPointer);
+                } else {
                     result[element] = elementFromRightHalf;
-                    rightHalfPointer=shift(rightHalfPointer);
+                    rightHalfPointer = shift(rightHalfPointer);
                 }
-            }
-            else
-                if (!isArrayEnded(leftHalf, leftHalfPointer)) {
-                    int elementFromLeftHalf = leftHalf[leftHalfPointer];
-                    result[element] = elementFromLeftHalf;
-                    leftHalfPointer=shift(leftHalfPointer);
-                }
-                else {
-                    int elementFromRightHalf = rightHalf[rightHalfPointer];
-                    result[element] = elementFromRightHalf;
-                    rightHalfPointer=shift(rightHalfPointer);
+            } else if (!isArrayEnded(leftHalf, leftHalfPointer)) {
+                int elementFromLeftHalf = leftHalf[leftHalfPointer];
+                result[element] = elementFromLeftHalf;
+                leftHalfPointer = shift(leftHalfPointer);
+            } else {
+                int elementFromRightHalf = rightHalf[rightHalfPointer];
+                result[element] = elementFromRightHalf;
+                rightHalfPointer = shift(rightHalfPointer);
             }
         }
         return result;
     }
-    private int shift(int counter){
-        return counter+1;
+
+    private int shift(int counter) {
+        return counter + 1;
     }
-    private boolean isArrayEnded(Integer[]array, int currElementIndex){
+
+    private boolean isArrayEnded(Integer[] array, int currElementIndex) {
         return currElementIndex >= array.length;
     }
 
