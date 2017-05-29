@@ -17,8 +17,10 @@ public class RandomArray {
 
     private void fillArray() {
         Random randomGenerator = Randomizer.getInstance().getRandomGenerator();
+        int min = -500;
+        int max = 500;
         for (int size = 0; size < arrayLength; size++) {
-            randomArray.add(randomGenerator.nextInt());
+            randomArray.add(randomGenerator.nextInt((max-min)+1)+min);
         }
     }
 

@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseWheelEvent;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -176,13 +177,22 @@ public class MainFrame {
                 dataController.setByKey(key, dataFields.get(key).getText());
             }
             dataController.createArrays();
+            InfoLogger logger = dataController.getLogger();
+           try {
+                logger.logData(dataController.getFunctionData());
+            } catch (IOException exep) {
+                exep.printStackTrace();
+            }
             try {
                 dataController.sorting();
+
 
             } catch (ExecutionException | InterruptedException e1) {
                 e1.printStackTrace();
             }
+            System.out.println(InfoLogger.getConstructorCalls());
         });
+
     }
 
     private void clearTable() {
